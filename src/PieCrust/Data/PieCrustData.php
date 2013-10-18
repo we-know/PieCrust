@@ -34,7 +34,7 @@ class PieCrustData
         
         $this->version = PieCrustDefaults::VERSION;
         $this->url = 'http://bolt80.com/piecrust/';
-        $this->branding = 'Baked with <em><a href="'. $this->url . '">PieCrust</a> ' . $this->version . '</em>.';
+        $this->branding = '';
     }
     
     public function debug_info()
