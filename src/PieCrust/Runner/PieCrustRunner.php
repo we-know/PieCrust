@@ -129,7 +129,12 @@ class PieCrustRunner
                 HttpHeaderHelper::setOrAddHeader('Cache-Control', 'public, max-age=' . $cacheTime, $headers);
             }
         }
-    
+        
+        // evaluate inline php in templates
+        ob_start();
+        echo eval(' ?>'.$output.'<?php ');
+        $output = ob_get_clean();
+
         // Output with or without GZip compression.
         $gzipEnabled = (($this->pieCrust->getConfig()->getValueUnchecked('site/enable_gzip') === true) and
                         (array_key_exists('HTTP_ACCEPT_ENCODING', $server)) and
