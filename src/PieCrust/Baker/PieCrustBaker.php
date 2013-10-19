@@ -127,7 +127,8 @@ class PieCrustBaker implements IBaker
                 'processors' => '*',
                 'mounts' => array(),
                 'skip_patterns' => array(),
-                'force_patterns' => array()
+                'force_patterns' => array(),
+                'deploy' => array()
             ),
             $bakerParametersFromApp,
             $bakerParameters
@@ -263,6 +264,28 @@ class PieCrustBaker implements IBaker
         
         $this->logger->info('-------------------------');
         $this->logger->notice(self::formatTimed($overallStart, 'done baking'));
+
+        // deploy via (s)ftp
+        if(isset($this->parameters['deploy']['method'])) {
+          $this->logger->info('-------------------------');
+          $this->logger->notice(self::formatTimed($overallStart,'start deployment'));
+          switch($this->parameters['deploy']['method']) {
+            case 'sftp' :
+              $server = "sftp://{$this->parameters['deploy']['server']}";
+            case 'ftp' :
+              $server = isset($server) ? $server : $this->parameters['deploy']['server'];
+              if(isset($this->parameters['deploy']['port'])) {
+                $server .= ":{$this->parameters['deploy']['port']}";
+              }
+              passthru("lftp -u {$this->parameters['deploy']['username']},{$this->parameters['deploy']['password']} -e \"mirror -nRep {$this->getBakeDir()} {$this->parameters['deploy']['path']}; quit\"  {$server}");
+              break;
+            default :
+              $this->logger->err("Deployment method \"{$this->parameters['deploy']['method']}\" is unknown!");
+          }
+        }
+        
+        $this->logger->info('-------------------------');
+        $this->logger->notice(self::formatTimed($overallStart, 'done'));
     }
 
     protected function cleanLevel0Cache()
